@@ -1,27 +1,21 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
+import 'package:firebase_core/firebase_core.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 
-class HomePage extends StatefulWidget {
-  const HomePage({Key? key}) : super(key: key);
+class Store extends StatefulWidget {
+  const Store({Key? key}) : super(key: key);
 
   @override
-  State<HomePage> createState() => _HomePageState();
+  State<Store> createState() => _Store();
 }
 
-class _HomePageState extends State<HomePage> {
-  // text fields' controllers
-
+class _Store extends State<Store> {
   final TextEditingController _nomeController = TextEditingController();
-
-  final TextEditingController _enderecoController = TextEditingController();
-
-  final TextEditingController _celularController = TextEditingController();
-
+  final TextEditingController _bairroController = TextEditingController();
+  final TextEditingController _cepController = TextEditingController();
   final TextEditingController _cidadeController = TextEditingController();
-
-  final TextEditingController _emailController = TextEditingController();
-
-  //final TextEditingController _imageController = TextEditingController();
+  final TextEditingController _ufController = TextEditingController();
 
   final CollectionReference _user =
       FirebaseFirestore.instance.collection('users');
@@ -31,18 +25,11 @@ class _HomePageState extends State<HomePage> {
 
     if (documentSnapshot != null) {
       action = 'update';
-
       _nomeController.text = documentSnapshot['nome'];
-
-      _enderecoController.text = documentSnapshot['endereco'];
-
-      _celularController.text = documentSnapshot['celular'];
-
+      _bairroController.text = documentSnapshot['bairro'];
+      _cepController.text = documentSnapshot['cep'];
       _cidadeController.text = documentSnapshot['cidade'];
-
-      _emailController.text = documentSnapshot['email'];
-
-      //_imageController.text = documentSnapshot['image'];
+      _ufController.text = documentSnapshot['uf'];
     }
 
     await showModalBottomSheet(
@@ -54,9 +41,6 @@ class _HomePageState extends State<HomePage> {
                 top: 20,
                 left: 20,
                 right: 20,
-
-// prevent the soft keyboard from covering text fields
-
                 bottom: MediaQuery.of(ctx).viewInsets.bottom + 20),
             child: Column(
               mainAxisSize: MainAxisSize.min,
@@ -66,95 +50,64 @@ class _HomePageState extends State<HomePage> {
                   controller: _nomeController,
                   decoration: const InputDecoration(labelText: 'Nome'),
                 ),
-
                 TextField(
-                  controller: _enderecoController,
-                  decoration: const InputDecoration(labelText: 'Endereço'),
+                  controller: _bairroController,
+                  decoration: const InputDecoration(labelText: 'Bairo'),
                 ),
-
                 TextField(
-                  controller: _celularController,
-                  decoration: const InputDecoration(labelText: 'Celular'),
+                  controller: _cepController,
+                  decoration: const InputDecoration(labelText: 'CEP'),
                 ),
-
                 TextField(
-                  // keyboardType:
-
-                  //   const TextInputType.numberWithOptions(decimal: true),
-
+                  controller: _ufController,
+                  decoration: const InputDecoration(labelText: 'UF'),
+                ),
+                TextField(
                   controller: _cidadeController,
-
-                  decoration: const InputDecoration(
-                    labelText: 'Cidade',
-                  ),
+                  decoration: const InputDecoration(labelText: 'Cidade'),
                 ),
-
-                //TextField(
-
-                //  controller: _imageController,
-
-                //  decoration: const InputDecoration(labelText: 'Imagem'),
-
-                //),
-
                 const SizedBox(
                   height: 20,
                 ),
-
                 ElevatedButton(
                   child: Text(action == 'create' ? 'Salvar' : 'Alterar'),
                   onPressed: () async {
                     final String? nome = _nomeController.text;
-
-                    final String? endereco = _enderecoController.text;
-
-                    //final double? price =
-
-                    //  double.tryParse(_priceController.text);
-
-                    final String? celular = _celularController.text;
-
+                    final String? bairro = _bairroController.text;
+                    final String? cep = _cepController.text;
                     final String? cidade = _cidadeController.text;
+                    final String? uf = _ufController.text;
 
                     if (nome != null &&
-                        endereco != null &&
-                        celular != null &&
-                        cidade != null) {
+                        bairro != null &&
+                        cep != null &&
+                        cidade != null &&
+                        uf != null) {
                       if (action == 'create') {
-// Persist a new product to Firestore
-
                         await _user.add({
                           "nome": nome,
-                          "endereco": endereco,
-                          "celular": celular,
-                          "cidade": cidade
+                          "bairro": bairro,
+                          "cep": cep,
+                          "cidade": cidade,
+                          "uf": uf
                         });
                       }
 
                       if (action == 'update') {
-// Update the product
-
                         await _user.doc(documentSnapshot!.id).update({
                           "nome": nome,
-                          "endereco": endereco,
-                          "celular": celular,
-                          "cidade": cidade
+                          "bairro": bairro,
+                          "cep": cep,
+                          "cidade": cidade,
+                          "uf": uf
                         });
                       }
 
-                      // Clear the text fields
-
                       _nomeController.text = '';
-
-                      _enderecoController.text = '';
-
-                      _celularController.text = '';
-
+                      _bairroController.text = '';
+                      _cepController.text = '';
                       _cidadeController.text = '';
-
-                      //_imageController.text = '';
-
-                      // Hide the bottom sheet
+                      _ufController.text = '';
 
                       Navigator.of(context).pop();
                     }
@@ -166,15 +119,11 @@ class _HomePageState extends State<HomePage> {
         });
   }
 
-  // Deleteing a product by id
-
-  Future<void> _deleteProduct(String productId) async {
-    await _user.doc(productId).delete();
-
-// Show a snackbar
+  Future<void> _deleteProduct(String storeId) async {
+    await _user.doc(storeId).delete();
 
     ScaffoldMessenger.of(context)
-        .showSnackBar(const SnackBar(content: Text('Chocolate excluído!')));
+        .showSnackBar(const SnackBar(content: Text('Livro excluído!')));
   }
 
   @override
@@ -183,9 +132,6 @@ class _HomePageState extends State<HomePage> {
       appBar: AppBar(
         title: const Text('AppCrudFirestore'),
       ),
-
-// Using StreamBuilder to display all products from Firestore in real-time
-
       body: StreamBuilder(
         stream: _user.snapshots(),
         builder: (context, AsyncSnapshot<QuerySnapshot> streamSnapshot) {
@@ -200,20 +146,15 @@ class _HomePageState extends State<HomePage> {
                   margin: const EdgeInsets.all(10),
                   child: ListTile(
                     title: Text(documentSnapshot['nome']),
-                    subtitle: Text(documentSnapshot['email'].toString()),
+                    subtitle: Text(documentSnapshot['bairro']),
                     trailing: SizedBox(
                       width: 100,
                       child: Row(
                         children: [
-// Press this button to edit a single product
-
                           IconButton(
                               icon: const Icon(Icons.edit),
                               onPressed: () =>
                                   _createOrUpdate(documentSnapshot)),
-
-// This icon button is used to delete a single product
-
                           IconButton(
                               icon: const Icon(Icons.delete),
                               onPressed: () =>
@@ -232,9 +173,6 @@ class _HomePageState extends State<HomePage> {
           );
         },
       ),
-
-// Add new product
-
       floatingActionButton: FloatingActionButton(
         onPressed: () => _createOrUpdate(),
         child: const Icon(Icons.add),

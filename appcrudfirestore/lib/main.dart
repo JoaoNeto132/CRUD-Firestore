@@ -1,7 +1,21 @@
 import 'package:flutter/material.dart';
-import 'package:appcrudfirestore/main.dart';
+import 'package:firebase_core/firebase_core.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:appcrudfirestore/screens/store.dart';
 
-void main() => runApp(MyApp());
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  await Firebase.initializeApp(
+    options: const FirebaseOptions(
+        apiKey: "AIzaSyCP5nJ593NxZrzF8zsQVWwYfMyoM1P5ORg",
+        authDomain: "bdfirestore-e2381.firebaseapp.com",
+        projectId: "bdfirestore-e2381",
+        storageBucket: "bdfirestore-e2381.appspot.com",
+        messagingSenderId: "418382540646",
+        appId: "1:418382540646:web:d8e724b7b26bca919e22a7"),
+  );
+  runApp(const MyApp());
+}
 
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
@@ -51,7 +65,8 @@ class MyHomePage extends StatelessWidget {
               leading: Icon(Icons.shopping_cart),
               title: Text("Store"),
               onTap: () {
-                Navigator.pop(context);
+                Navigator.push(
+                    context, MaterialPageRoute(builder: (context) => Store()));
 
                 //Navegar para outra página
               },
